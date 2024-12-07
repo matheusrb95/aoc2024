@@ -27,93 +27,16 @@ func run() int {
 		xmasMatrix = append(xmasMatrix, []byte(input.Text()))
 	}
 
-	for i := 0; i < len(xmasMatrix); i++ {
-		for j := 0; j < len(xmasMatrix[i]); j++ {
-			if xmasMatrix[i][j] == 'X' {
-				// horizontal
-				if j < len(xmasMatrix[i])-3 {
-					if xmasMatrix[i][j+1] == 'M' {
-						if xmasMatrix[i][j+2] == 'A' {
-							if xmasMatrix[i][j+3] == 'S' {
-								result++
-							}
-						}
-					}
-				}
+	lenRow := len(xmasMatrix[0])
+	lenColumn := len(xmasMatrix)
 
-				// horizontal reverted
-				if j >= 3 {
-					if xmasMatrix[i][j-1] == 'M' {
-						if xmasMatrix[i][j-2] == 'A' {
-							if xmasMatrix[i][j-3] == 'S' {
-								result++
-							}
-						}
-					}
-				}
-
-				// vertical
-				if i < len(xmasMatrix)-3 {
-					if xmasMatrix[i+1][j] == 'M' {
-						if xmasMatrix[i+2][j] == 'A' {
-							if xmasMatrix[i+3][j] == 'S' {
-								result++
-							}
-						}
-					}
-				}
-
-				// vertical reverted
-				if i >= 3 {
-					if xmasMatrix[i-1][j] == 'M' {
-						if xmasMatrix[i-2][j] == 'A' {
-							if xmasMatrix[i-3][j] == 'S' {
-								result++
-							}
-						}
-					}
-				}
-
-				// diagonal right up
-				if i >= 3 && j < len(xmasMatrix[i])-3 {
-					if xmasMatrix[i-1][j+1] == 'M' {
-						if xmasMatrix[i-2][j+2] == 'A' {
-							if xmasMatrix[i-3][j+3] == 'S' {
-								result++
-							}
-						}
-					}
-				}
-
-				// diagonal left up
-				if i >= 3 && j >= 3 {
-					if xmasMatrix[i-1][j-1] == 'M' {
-						if xmasMatrix[i-2][j-2] == 'A' {
-							if xmasMatrix[i-3][j-3] == 'S' {
-								result++
-							}
-						}
-					}
-				}
-
-				// diagonal right down
-				if i < len(xmasMatrix)-3 && j >= 3 {
-					if xmasMatrix[i+1][j-1] == 'M' {
-						if xmasMatrix[i+2][j-2] == 'A' {
-							if xmasMatrix[i+3][j-3] == 'S' {
-								result++
-							}
-						}
-					}
-				}
-
-				// diagonal left down
-				if i < len(xmasMatrix)-3 && j < len(xmasMatrix[i])-3 {
-					if xmasMatrix[i+1][j+1] == 'M' {
-						if xmasMatrix[i+2][j+2] == 'A' {
-							if xmasMatrix[i+3][j+3] == 'S' {
-								result++
-							}
+	for i := 0; i < lenColumn; i++ {
+		for j := 0; j < lenRow; j++ {
+			if j >= 1 && j < lenRow-1 && i >= 1 && i < lenColumn-1 {
+				if xmasMatrix[i][j] == 'A' {
+					if (leftUp(xmasMatrix, i, j) == 'M' && rightDown(xmasMatrix, i, j) == 'S') || (leftUp(xmasMatrix, i, j) == 'S' && rightDown(xmasMatrix, i, j) == 'M') {
+						if (rightUp(xmasMatrix, i, j) == 'M' && leftDown(xmasMatrix, i, j) == 'S') || (rightUp(xmasMatrix, i, j) == 'S' && leftDown(xmasMatrix, i, j) == 'M') {
+							result++
 						}
 					}
 				}
@@ -124,4 +47,20 @@ func run() int {
 	fmt.Println(result)
 
 	return 0
+}
+
+func rightUp(matrix [][]byte, i, j int) byte {
+	return matrix[i-1][j+1]
+}
+
+func rightDown(matrix [][]byte, i, j int) byte {
+	return matrix[i+1][j+1]
+}
+
+func leftUp(matrix [][]byte, i, j int) byte {
+	return matrix[i-1][j-1]
+}
+
+func leftDown(matrix [][]byte, i, j int) byte {
+	return matrix[i+1][j-1]
 }
