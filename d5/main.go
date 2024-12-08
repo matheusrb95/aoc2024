@@ -14,7 +14,7 @@ func main() {
 }
 
 func run() int {
-	f, err := os.Open("test.txt")
+	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Println(err)
 		return 1
@@ -54,21 +54,37 @@ func run() int {
 		rules[ruleInt[0]] = append(rules[ruleInt[0]], ruleInt[1])
 	}
 
-	var validSequences [][]int
+	var invalidSequences [][]int
 
 	for _, sequence := range sequences {
-		if valid(rules, sequence) {
-			validSequences = append(validSequences, sequence)
+		if !valid(rules, sequence) {
+			invalidSequences = append(invalidSequences, sequence)
 		}
 	}
 
+	for _, sequence := range invalidSequences {
+		correct(rules, sequence)
+		fmt.Println(sequence)
+	}
+
 	var result int
-	for _, order := range validSequences {
+	for _, order := range invalidSequences {
 		result += order[len(order)/2]
 	}
 	fmt.Println(result)
 
 	return 0
+}
+
+func correct(rules map[int][]int, sequence []int) {
+	for j := 1; j < len(sequence); j++ {
+		if !contains(rules[sequence[j-1]], sequence[j]) {
+			x := sequence[j-1]
+			sequence[j-1] = sequence[j]
+			sequence[j] = x
+			correct(rules, sequence)
+		}
+	}
 }
 
 func valid(rules map[int][]int, sequence []int) bool {
