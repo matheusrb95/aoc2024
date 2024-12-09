@@ -15,8 +15,10 @@ type Vector struct {
 }
 
 type Guard struct {
-	Pos Vector
-	Dir Vector
+	Pos     Vector
+	Dir     Vector
+	LastPos []Vector
+	SamePos int
 }
 
 func main() {
@@ -24,7 +26,7 @@ func main() {
 }
 
 func run() int {
-	input, err := readInput("test.txt")
+	input, err := readInput("input.txt")
 	if err != nil {
 		log.Println(err)
 		return 1
@@ -33,12 +35,26 @@ func run() int {
 	lenInputX = len(input[0])
 	lenInputY = len(input)
 
-	obstacles := obstacles(input)
-	g := NewGuard(input)
+	var result uintptr
 
-	path := make(map[Vector]bool)
-	g.calculateRoute(obstacles, path)
-	fmt.Println(len(path))
+	for i := 0; i < lenInputX; i++ {
+		for j := 0; j < lenInputY; j++ {
+			obstacles := obstacles(input)
+			candidateObstacle := Vector{x: i, y: j}
+			obstacles = append(obstacles, candidateObstacle)
+
+			g := NewGuard(input)
+
+			path := make(map[Vector]bool)
+			g.calculateRoute(obstacles, path)
+			if g.isLoop() {
+				result++
+				continue
+			}
+		}
+	}
+
+	fmt.Println(result)
 
 	return 0
 }
@@ -54,11 +70,14 @@ func (g *Guard) tracePath(obstacle Vector, path map[Vector]bool) {
 		newY := g.Pos.y + (i * g.Dir.y)
 
 		path[Vector{x: newX, y: newY}] = true
-		fmt.Println(newX, newY)
 	}
 }
 
 func (g *Guard) calculateRoute(obstacles []Vector, path map[Vector]bool) {
+	if g.isLoop() {
+		return
+	}
+
 	closestObstacle := g.closestObstacle(obstacles)
 	if closestObstacle == (Vector{}) {
 		var newX int
@@ -84,6 +103,7 @@ func (g *Guard) calculateRoute(obstacles []Vector, path map[Vector]bool) {
 	}
 
 	g.tracePath(closestObstacle, path)
+	g.appendLastPos(g.Pos)
 	g.Pos.x = closestObstacle.x - g.Dir.x
 	g.Pos.y = closestObstacle.y - g.Dir.y
 	g.rotateDir()
@@ -152,6 +172,23 @@ func (g *Guard) closestObstacle(obstacles []Vector) Vector {
 	}
 
 	return result
+}
+
+func (g *Guard) appendLastPos(pos Vector) {
+	if contains(g.LastPos, pos) {
+		g.SamePos++
+		return
+	}
+
+	g.LastPos = append(g.LastPos, pos)
+}
+
+func (g *Guard) isLoop() bool {
+	if g.SamePos == 4 {
+		return true
+	}
+
+	return false
 }
 
 func (g *Guard) rotateDir() {
@@ -226,4 +263,13 @@ func abs(num int) int {
 		return num * -1
 	}
 	return num
+}
+
+func contains(s []Vector, e Vector) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
