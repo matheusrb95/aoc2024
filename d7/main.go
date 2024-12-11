@@ -54,6 +54,8 @@ func evaluate(values []int, operators string) int {
 			result += values[i]
 		} else if operators[i-1] == '*' {
 			result *= values[i]
+		} else if operators[i-1] == '|' {
+			result, _ = concatenateInt(result, values[i])
 		}
 	}
 
@@ -82,6 +84,10 @@ func generateCombinations(combinations *[]string, base []rune, mult, start int) 
 
 	for i := start; i < len(base); i++ {
 		base[i] = '*'
+		generateCombinations(combinations, base, mult-1, i+1)
+		base[i] = '+'
+
+		base[i] = '|'
 		generateCombinations(combinations, base, mult-1, i+1)
 		base[i] = '+'
 	}
@@ -132,4 +138,13 @@ func stringsToIntegers(lines []string) ([]int, error) {
 		integers = append(integers, n)
 	}
 	return integers, nil
+}
+
+func concatenateInt(value1, value2 int) (int, error) {
+	result, err := strconv.Atoi(strconv.Itoa(value1) + strconv.Itoa(value2))
+	if err != nil {
+		return 0, err
+	}
+
+	return result, nil
 }
