@@ -10,8 +10,6 @@ import (
 
 var lenRow, lenCol int
 
-type trailhead map[Pos]int
-
 type Pos struct {
 	row int
 	col int
@@ -30,23 +28,22 @@ func run() int {
 
 	lenRow, lenCol = len(topographicMap[0]), len(topographicMap)
 
-	trailhead := make(map[Pos]map[Pos]int)
+	trailhead := make(map[Pos]int)
 
 	for row := 0; row < len(topographicMap); row++ {
 		for col := 0; col < len(topographicMap[row]); col++ {
 			x := topographicMap[row][col]
 			if x == 0 {
 				pos := Pos{row: row, col: col}
-				trailhead[pos] = make(map[Pos]int)
-				traceRoute(topographicMap, pos, 0, trailhead[pos])
+				traceRoute(topographicMap, pos, 0, trailhead)
 			}
 
 		}
 	}
 
 	var result int
-	for k := range trailhead {
-		result += len(trailhead[k])
+	for _, v := range trailhead {
+		result += v
 	}
 
 	fmt.Println(result)
