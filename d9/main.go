@@ -33,37 +33,62 @@ func run() int {
 		id++
 	}
 
-	block := make([]int, 0)
+	a := make(map[int][]int)
+	b := make(map[int][]int)
 
-	for i := 0; i <= id; i++ {
+	for i := 0; i < len(disk); i++ {
 		for j := 0; j < disk[i]; j++ {
-			block = append(block, i)
+			a[i] = append(a[i], i)
 		}
 
 		for j := 0; j < free[i]; j++ {
-			block = append(block, -1)
+			b[i] = append(b[i], -1)
 		}
 	}
 
-	for i := 0; i < len(block); i++ {
-		if block[i] != -1 {
-			continue
-		}
-
-		for j := len(block) - 1; j > 0; j-- {
-			if block[j] == -1 {
+	for i := 0; i < len(free); i++ {
+		for j := len(disk) - 1; j > 0; j-- {
+			if _, ok := disk[j]; !ok {
 				continue
 			}
 
-			block = swapElement(block, i, j)
-			block = removeEndDots(block)
-			break
+			if disk[j] > free[i] {
+				continue
+			}
+
+			free[i] -= disk[j]
+
+			var temp1, temp2 []int
+			for k := 0; k < disk[j]; k++ {
+				temp1 = append(temp1, -1)
+			}
+
+			for k := 0; k < free[i]; k++ {
+				temp2 = append(temp2, -1)
+			}
+
+			a[i] = append(a[i], a[j]...)
+			a[j] = temp1
+			b[i] = temp2
+
+			delete(disk, j)
 		}
 	}
 
+	var format []int
+
+	for x := 0; x < len(a); x++ {
+		format = append(format, a[x]...)
+		format = append(format, b[x]...)
+	}
+
 	var result int
-	for i := 0; i < len(block); i++ {
-		result += i * block[i]
+	for i, num := range format {
+		if num == -1 {
+			continue
+		}
+
+		result += i * num
 	}
 
 	fmt.Println(result)
@@ -108,25 +133,4 @@ func stringToIntegers(line string) ([]int, error) {
 		result = append(result, n)
 	}
 	return result, nil
-}
-
-func swapElement(slice []int, i int, j int) []int {
-	r := slice[i]
-	slice[i] = slice[j]
-	slice[j] = r
-
-	return slice
-}
-
-func removeEndDots(slice []int) []int {
-	for j := len(slice) - 1; j > 0; j-- {
-		if slice[j] != -1 {
-			break
-		}
-
-		slice = slice[:j]
-
-	}
-
-	return slice
 }
