@@ -9,6 +9,13 @@ import (
 	"strings"
 )
 
+var blinkTimes int = 75
+
+type NumAndBlinks struct {
+	Num    int
+	Blinks int
+}
+
 func main() {
 	os.Exit(run())
 }
@@ -20,32 +27,40 @@ func run() int {
 		return 1
 	}
 
-	blinkTimes := 25
-	for i := 0; i < blinkTimes; i++ {
-		result := make([]int, 0)
-		lenInput := len(input)
-		for j := 0; j < lenInput; j++ {
-			switch rule(input[j]) {
-			case 1:
-				result = append(result, 1)
-			case 2:
-				slice, err := split(input, j)
-				if err != nil {
-					log.Println(err)
-					return 1
-				}
-				result = append(result, slice...)
-			default:
-				result = append(result, input[j]*2024)
-			}
-		}
+	count := make(map[NumAndBlinks]int)
 
-		input = result
+	var result int
+	for _, num := range input {
+		result += calc(num, blinkTimes, count)
 	}
 
-	fmt.Print(len(input))
+	fmt.Println(result)
 
 	return 0
+}
+
+func calc(num, blinks int, count map[NumAndBlinks]int) int {
+	if blinks == 0 {
+		return 1
+	}
+
+	if total := count[NumAndBlinks{Num: num, Blinks: blinks}]; total > 0 {
+		return total
+	}
+
+	var result int
+	switch rule(num) {
+	case 1:
+		result = calc(1, blinks-1, count)
+	case 2:
+		first, second := split(num)
+		result = calc(first, blinks-1, count) + calc(second, blinks-1, count)
+	default:
+		result = calc(num*2024, blinks-1, count)
+	}
+
+	count[NumAndBlinks{Num: num, Blinks: blinks}] = result
+	return result
 }
 
 func rule(num int) int {
@@ -61,21 +76,15 @@ func rule(num int) int {
 	return 0
 }
 
-func split(slice []int, index int) ([]int, error) {
-	strNum := strconv.Itoa(slice[index])
+func split(num int) (int, int) {
+	strNum := strconv.Itoa(num)
 	mid := len(strNum) / 2
 	firstHalf, secondHalf := strNum[:mid], strNum[mid:]
 
-	firstInt, err := strconv.Atoi(firstHalf)
-	if err != nil {
-		return nil, err
-	}
-	secondInt, err := strconv.Atoi(secondHalf)
-	if err != nil {
-		return nil, err
-	}
+	firstInt, _ := strconv.Atoi(firstHalf)
+	secondInt, _ := strconv.Atoi(secondHalf)
 
-	return []int{firstInt, secondInt}, nil
+	return firstInt, secondInt
 }
 
 func readInput(filepath string) ([]int, error) {
