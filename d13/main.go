@@ -39,7 +39,7 @@ func run() int {
 
 	var result int
 	for _, a := range input {
-		solution, err := a.SolveDirectSubstitution()
+		solution, err := a.SolveDirectSubstitution(10000000000000)
 		if err != nil {
 			continue
 		}
@@ -52,10 +52,10 @@ func run() int {
 	return 0
 }
 
-func (a *Arcade) SolveDirectSubstitution() ([]int, error) {
+func (a *Arcade) SolveDirectSubstitution(offset int) ([]int, error) {
 	x0, y0 := a.A.X, a.A.Y
 	x1, y1 := a.B.X, a.B.Y
-	cx, cy := a.Prize.X, a.Prize.Y
+	cx, cy := a.Prize.X+offset, a.Prize.Y+offset
 
 	Bdividend := (cy*x0 - cx*y0)
 	Bdivisor := (y1*x0 - y0*x1)
