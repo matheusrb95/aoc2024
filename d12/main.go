@@ -34,12 +34,54 @@ func run() int {
 
 	var result int
 	for _, region := range g.Regions {
-		result += len(region) * calculatePerimeter(region)
+		result += len(region) * calculateSides(region)
 	}
 
 	fmt.Println(result)
 
 	return 0
+}
+
+func calculateSides(region map[Coordinate]bool) int {
+	sides := make([]map[Coordinate]bool, 0)
+
+	for _, dir := range [][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}} {
+		side := make(map[Coordinate]bool)
+
+		for coord := range region {
+			newCoord := Coordinate{X: coord.X + dir[0], Y: coord.Y + dir[1]}
+			if _, ok := region[newCoord]; ok {
+				continue
+			}
+
+			side[coord] = true
+		}
+		sides = append(sides, side)
+	}
+
+	var result int
+
+	for i, side := range sides {
+		for coord := range side {
+			if i < 2 {
+				newCoord := Coordinate{X: coord.X, Y: coord.Y + 1}
+				if _, ok := side[newCoord]; ok {
+					continue
+				}
+
+				result++
+			} else {
+				newCoord := Coordinate{X: coord.X + 1, Y: coord.Y}
+				if _, ok := side[newCoord]; ok {
+					continue
+				}
+
+				result++
+			}
+		}
+	}
+
+	return result
 }
 
 func calculatePerimeter(region map[Coordinate]bool) int {
