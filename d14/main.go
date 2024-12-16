@@ -12,7 +12,7 @@ import (
 const (
 	width  int = 101
 	height int = 103
-	times  int = 100
+	times  int = 10_000
 )
 
 type Position struct {
@@ -61,32 +61,67 @@ func run() int {
 		return 0
 	}
 
-	bathroom := make(map[Position]int)
-	for _, robot := range input {
-		for i := 1; i <= times; i++ {
+	for i := 1; i <= times; i++ {
+		bathroom := make(map[Position]int)
+		for _, robot := range input {
 			robot.move()
+			bathroom[robot.Pos]++
 		}
 
-		bathroom[robot.Pos]++
-	}
-
-	quads := NewQuads()
-
-	var robots int
-	result := 1
-
-	for _, quad := range quads {
-		for _, pos := range quad.Positions {
-			robots += bathroom[pos]
+		if !overlaps(bathroom) {
+			Print(i, input)
 		}
-
-		result *= robots
-		robots = 0
 	}
 
-	fmt.Println(result)
+	// quads := NewQuads()
+
+	// var robots int
+	// result := 1
+
+	// for _, quad := range quads {
+	// 	for _, pos := range quad.Positions {
+	// 		robots += bathroom[pos]
+	// 	}
+
+	// 	result *= robots
+	// 	robots = 0
+	// }
+
+	// fmt.Println(result)
 
 	return 0
+}
+
+func overlaps(bathroom map[Position]int) bool {
+	for _, v := range bathroom {
+		if v > 1 {
+			return true
+		}
+	}
+
+	return false
+}
+
+func Print(n int, robots []*Robot) {
+	matrix := make([][]rune, height)
+
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
+			matrix[i] = append(matrix[i], '.')
+		}
+	}
+
+	for _, robot := range robots {
+		matrix[robot.Pos.X][robot.Pos.Y] = '#'
+	}
+
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
+			fmt.Print(string(matrix[i][j]))
+		}
+		fmt.Println()
+	}
+	fmt.Printf("%d: ======================================================================================================\n", n)
 }
 
 func NewQuads() []Quad {
@@ -130,14 +165,14 @@ func NewQuads() []Quad {
 	return result
 }
 
-func readInput(filepath string) ([]Robot, error) {
+func readInput(filepath string) ([]*Robot, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	result := make([]Robot, 0)
+	result := make([]*Robot, 0)
 	input := bufio.NewScanner(f)
 	for input.Scan() {
 		line := input.Text()
@@ -167,7 +202,7 @@ func readInput(filepath string) ([]Robot, error) {
 			return nil, err
 		}
 
-		result = append(result, robot)
+		result = append(result, &robot)
 	}
 
 	return result, nil
